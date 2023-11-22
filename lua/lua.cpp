@@ -201,17 +201,24 @@ void Lua::write_block(const Ast::Function& function, const std::vector<Ast::Stat
 			if (isFunctionDefinition) {
 				if (!previousLineIsEmpty) write(NEW_LINE);
 				write_indent();
-				write("function ");
 
 				if (block[i]->assignment.variables.back().type == Ast::AST_VARIABLE_TABLE_INDEX
 					&& block[i]->assignment.expressions.back()->function->parameterNames.size()
 					&& block[i]->assignment.expressions.back()->function->parameterNames.front() == "self") {
 					write_variable(*block[i]->assignment.variables.back().table->variable, false);
-					write(":", block[i]->assignment.variables.back().tableIndex->constant->string);
-					write_function_definition(*block[i]->assignment.expressions.back()->function, true);
-				} else {
-					write_variable(block[i]->assignment.variables.back(), false);
+					write(".", block[i]->assignment.variables.back().tableIndex->constant->string);
+					write(" = function ");
 					write_function_definition(*block[i]->assignment.expressions.back()->function, false);
+				} else {
+					if (block[i]->assignment.variables.back().type == Ast::AST_VARIABLE_TABLE_INDEX) {
+						write_variable(block[i]->assignment.variables.back(), false);
+						write(" = function ");
+						write_function_definition(*block[i]->assignment.expressions.back()->function, false);
+					} else {
+						write("function ");
+						write_variable(block[i]->assignment.variables.back(), false);
+						write_function_definition(*block[i]->assignment.expressions.back()->function, false);
+					}
 				}
 
 				if (i != block.size() - 1) {
@@ -365,7 +372,7 @@ void Lua::write_expression(const Ast::Expression& expression, const bool& usePar
 		write("...");
 		break;
 	case Ast::AST_EXPRESSION_FUNCTION:
-		write("function");
+		write("function ");
 		write_function_definition(*expression.function, false);
 		break;
 	case Ast::AST_EXPRESSION_VARIABLE:
