@@ -35,7 +35,7 @@ void Lua::write_block(const Ast::Function& function, const std::vector<Ast::Stat
 
 	if (!block.size()) {
 		write_indent();
-		write("-- block empty", NEW_LINE);
+		write("-- Nothing", NEW_LINE);
 		return;
 	}
 
