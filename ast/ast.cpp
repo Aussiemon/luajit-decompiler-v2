@@ -2432,7 +2432,12 @@ void Ast::eliminate_conditions(Function& function, std::vector<Statement*>& bloc
 				ConditionBuilder conditionBuilder(ConditionBuilder::STATEMENT, *this, INVALID_ID, targetLabel, extendedTargetLabel);
 
 				for (uint32_t j = index; j <= i; j++) {
-					assert(!block[j]->assignment.variables.size(), "Failed to eliminate all test and copy conditions", bytecode.filePath, DEBUG_INFO);
+					try {
+						assert(!block[j]->assignment.variables.size(), "Failed to eliminate all test and copy conditions", bytecode.filePath, DEBUG_INFO);
+					}
+					catch (...) {
+						print("\n" + bytecode.filePath + ":\nFailed to eliminate all test and copy conditions\n");
+					}
 					conditionBuilder.add_node(conditionBuilder.get_node_type(block[j]->instruction.type, block[j]->condition.swapped),
 						block[j]->instruction.label, function.get_label_from_id(block[j]->instruction.target), &block[j]->assignment.expressions);
 				}
@@ -2894,7 +2899,14 @@ void Ast::build_if_statements(Function& function, std::vector<Statement*>& block
 				targetLabel = INVALID_ID;
 			}
 
-			assert(targetLabel != INVALID_ID, "Failed to build if statement", bytecode.filePath, DEBUG_INFO);
+			try {
+				assert(targetLabel != INVALID_ID, "Failed to build if statement", bytecode.filePath, DEBUG_INFO);
+			}
+			catch (...) {
+				print("\n" + bytecode.filePath + ":\nFailed to build if statement\n");
+				continue;
+			}
+			
 			block[i]->block.reserve(index - i);
 			block[i]->block.insert(block[i]->block.begin(), block.begin() + i + 1, block.begin() + index + 1);
 			block.erase(block.begin() + i + 1, block.begin() + index + 1);
